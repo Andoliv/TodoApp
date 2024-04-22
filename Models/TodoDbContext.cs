@@ -16,7 +16,5 @@ public class TodoDbContext : DbContext
 
         base.OnModelCreating(modelBuilder);
     }
-    public DbSet<TodoApp.Models.TodoResponse> TodoResponse { get; set; } = default!;
-
 
 }
