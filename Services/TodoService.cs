@@ -33,6 +33,7 @@ namespace TodoApp.Services
         public async Task<TodoViewModel> CreateTodo(TodoViewModel todoViewModel)
         {
             var todo = _mapper.Map<Todo>(todoViewModel);
+
             _context.Add(todo);
             await _context.SaveChangesAsync();
 
@@ -41,11 +42,26 @@ namespace TodoApp.Services
 
         public async Task<TodoViewModel> UpdateTodo(TodoViewModel todoViewModel)
         {
-            var todo = _mapper.Map<Todo>(todoViewModel);
+            var todo = _context.Todos.FirstOrDefault(todo => todo.Id == todoViewModel.Id);
+
+            if (todo == null)
+            {
+                throw new Exception("The ToDo you are looking for does not exist!");
+            }
+
+            if (TodoExists(todoViewModel.Id))
+            {
+                todo.Item = todoViewModel.Item;
+                todo.IsCompleted = todoViewModel.IsCompleted;
+                todo.DueOn = todoViewModel.DueOn;
+                todo.UpdatedAt = DateTime.Now;
+            }
+
+
             _context.Update(todo);
             await _context.SaveChangesAsync();
 
-            return todoViewModel;
+            return _mapper.Map<TodoViewModel>(todo); ;
         }
 
         public async Task DeleteTodo(int id)

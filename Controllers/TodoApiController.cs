@@ -60,6 +60,7 @@ public class TodoApiController : ControllerBase
     // POST: api/todos
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateTodo([FromBody] TodoViewModel todoViewModel)
     {
         try
@@ -69,9 +70,69 @@ public class TodoApiController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            var todo = await _todoService.CreateTodo(todoViewModel);
+            var createdTodoViewModel = await _todoService.CreateTodo(todoViewModel);
 
-            return CreatedAtAction(nameof(GetTodoById), new { id = todo.Id }, todo);
+            return CreatedAtAction(nameof(GetTodoById), new { id = createdTodoViewModel.Id }, createdTodoViewModel);
+        }
+        catch (Exception ex)
+        {
+            return Problem(ex.Message);
+        }
+
+    }
+
+    // PUT: api/todos/5
+    [HttpPut("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(TodoViewModel), StatusCodes.Status200OK)]
+    public async Task<IActionResult> UpdateTodo([FromRoute] int id, [FromBody] TodoViewModel todoViewModel)
+    {
+        try
+        {
+            if (todoViewModel.Id == null)
+            {
+                todoViewModel.Id = id;
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (!_todoService.TodoExists(id))
+            {
+                return NotFound("The ToDo you are looking for does not exist!");
+            }
+
+            var updatedTodoViewModel = await _todoService.UpdateTodo(todoViewModel);
+
+            return Ok(updatedTodoViewModel);
+        }
+        catch (Exception ex)
+        {
+            return Problem(ex.Message);
+        }
+
+    }
+
+    // DELETE: api/todos/5
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteTodoById([FromRoute] int id)
+    {
+        try
+        {
+            if (!_todoService.TodoExists(id))
+            {
+                return NotFound("The ToDo you are looking for does not exist!");
+            }
+
+            await _todoService.DeleteTodo(id);
+
+            return NoContent();
         }
         catch (Exception ex)
         {

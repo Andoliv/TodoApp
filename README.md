@@ -6,11 +6,13 @@ Web application that allows users to create, read, update, and delete tasks. The
 
 Use the Nugget Package Manager to install the following packages:
 
+	- AutoMapper
 	- Microsoft.EntityFrameworkCore
-	- Microsoft.EntityFrameworkCore.SqlServer
-	- Microsoft.EntityFrameworkCore.Tools
 	- Microsoft.EntityFrameworkCore.Design
+	- Microsoft.EntityFrameworkCore.Sqlite
+	- Microsoft.EntityFrameworkCore.Tools
 	- Microsoft.VisualStudio.Web.CodeGeneration.Design
+	- Swashbuckle.AspNetCore
 
 ## Creating the Database
 ### Applying Migrations to Database
