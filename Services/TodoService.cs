@@ -36,7 +36,7 @@ namespace TodoApp.Services
             _context.Add(todo);
             await _context.SaveChangesAsync();
 
-            return todoViewModel;
+            return _mapper.Map<TodoViewModel>(todo);
         }
 
         public async Task<TodoViewModel> UpdateTodo(TodoViewModel todoViewModel)
