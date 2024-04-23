@@ -1,48 +1,59 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using TodoApp.Models;
+using TodoApp.ViewModels;
 
 namespace TodoApp.Services
 {
     public class TodoService : ITodoService
     {
         private readonly TodoDbContext _context;
+        private readonly IMapper _mapper;
 
-        public TodoService(TodoDbContext context)
+        public TodoService(TodoDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        public async Task<IEnumerable<Todo>> GetTodos()
+        public async Task<IEnumerable<TodoViewModel>> GetTodos()
         {
-            return await _context.Todos.ToListAsync();
+            var todos = await _context.Todos.ToListAsync();
+
+            return _mapper.Map<IEnumerable<TodoViewModel>>(todos);
         }
 
-        public async Task<Todo> GetTodoById(int id)
+        public async Task<TodoViewModel> GetTodoById(int id)
         {
-            return await _context.Todos.FirstOrDefaultAsync(todo => todo.Id == id);
+            var todo = await _context.Todos.FirstOrDefaultAsync(todo => todo.Id == id);
+
+            return _mapper.Map<TodoViewModel>(todo);
         }
 
-        public async Task<Todo> CreateTodo(Todo todo)
+        public async Task<TodoViewModel> CreateTodo(TodoViewModel todoViewModel)
         {
+            var todo = _mapper.Map<Todo>(todoViewModel);
             _context.Add(todo);
             await _context.SaveChangesAsync();
 
-            return todo;
+            return todoViewModel;
         }
 
-        public async Task<Todo> UpdateTodo(Todo todo)
+        public async Task<TodoViewModel> UpdateTodo(TodoViewModel todoViewModel)
         {
+            var todo = _mapper.Map<Todo>(todoViewModel);
             _context.Update(todo);
             await _context.SaveChangesAsync();
 
-            return todo;
+            return todoViewModel;
         }
 
         public async Task DeleteTodo(int id)
         {
-            var todo = await GetTodoById(id);
+            var todo = await _context.Todos.FirstOrDefaultAsync(todo => todo.Id == id);
 
-            if (todo != null) { 
+            if (todo != null)
+            {
                 _context.Remove(todo);
                 await _context.SaveChangesAsync();
             }

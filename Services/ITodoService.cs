@@ -1,16 +1,17 @@
 ﻿using TodoApp.Models;
+using TodoApp.ViewModels;
 
 namespace TodoApp.Services
 {
     public interface ITodoService
     {
-        Task<IEnumerable<Todo>> GetTodos();
+        Task<IEnumerable<TodoViewModel>> GetTodos();
 
-        Task<Todo> GetTodoById(int id);
+        Task<TodoViewModel> GetTodoById(int id);
 
-        Task<Todo> CreateTodo(Todo todo);
+        Task<TodoViewModel> CreateTodo(TodoViewModel todoViewModel);
 
-        Task<Todo> UpdateTodo(Todo todo);
+        Task<TodoViewModel> UpdateTodo(TodoViewModel todoViewModel);
 
         Task DeleteTodo(int id);
         

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TodoApp.Models;
 using TodoApp.Services;
 using TodoApp.ViewModels;
 
@@ -16,42 +15,26 @@ public class TodoController : Controller
 
     public async Task<IActionResult> IndexAsync()
     {
-        var todos = await _todoService.GetTodos();
+        var todoViewModels = await _todoService.GetTodos();
 
-        if (todos == null)
+        if (todoViewModels == null)
         {
             return Problem("Entity set 'TodoDbContext.Todos' is null!");
         }
 
-        var todosResponse = todos.Select(todo => new TodoRequest
-        {
-            Id = todo.Id,
-            Item = todo.Item,
-            IsCompleted = todo.IsCompleted,
-            DueOn = todo.DueOn
-        });
-
-        return View(todosResponse);
+        return View(todoViewModels);
     }
 
     public async Task<IActionResult> DetailsAsync(int id)
     {
-        var todo = await _todoService.GetTodoById(id);
+        var todoViewModel = await _todoService.GetTodoById(id);
 
-        if(todo == null)
+        if (todoViewModel == null)
         {
             return NotFound();
         }
 
-        var todoResponse = new TodoRequest
-        {
-            Id = todo.Id,
-            Item = todo.Item,
-            IsCompleted = todo.IsCompleted,
-            DueOn = todo.DueOn
-        };
-
-        return View(todoResponse);
+        return View(todoViewModel);
     }
 
     // GET: Courses/Create
@@ -63,23 +46,14 @@ public class TodoController : Controller
     // POST: Courses/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateAsync(TodoRequest request)
+    public async Task<IActionResult> CreateAsync(TodoViewModel todoViewModel)
     {
         if (!ModelState.IsValid)
         {
-            return View(request);            
+            return View(todoViewModel);
         }
 
-        var todo = new Todo
-        {
-            Item = request.Item,
-            IsCompleted = request.IsCompleted,
-            DueOn = request.DueOn,
-            CreatedAt = DateTime.Now,
-            UpdatedAt = DateTime.Now
-        };
-
-        await _todoService.CreateTodo(todo);
+        await _todoService.CreateTodo(todoViewModel);
 
         return RedirectToAction(nameof(Index));
     }
@@ -92,55 +66,38 @@ public class TodoController : Controller
             return NotFound();
         }
 
-        var todo = await _todoService.GetTodoById(id.Value);
+        var todoViewModel = await _todoService.GetTodoById(id.Value);
 
-        if(todo == null)
+        if (todoViewModel == null)
         {
             return NotFound();
         }
 
-        var todoResponse = new TodoRequest
-        {
-            Id = todo.Id,
-            Item = todo.Item,
-            IsCompleted = todo.IsCompleted,
-            DueOn = todo.DueOn
-        };
-
-        return View(todoResponse);
+        return View(todoViewModel);
     }
 
     // POST: Courses/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, TodoRequest todoRequest)
+    public async Task<IActionResult> Edit(int id, TodoViewModel todoViewModel)
     {
-        if (id != todoRequest.Id)
+        if (id != todoViewModel.Id)
         {
             return NotFound();
         }
 
         if (!ModelState.IsValid)
         {
-            return View(todoRequest);
+            return View(todoViewModel);
         }
-
-        var todo = new Todo
-        {
-            Id = todoRequest.Id,
-            Item = todoRequest.Item,
-            IsCompleted = todoRequest.IsCompleted,
-            DueOn = todoRequest.DueOn,
-            UpdatedAt = DateTime.Now
-        };
 
         try
         {
-            await _todoService.UpdateTodo(todo);
+            await _todoService.UpdateTodo(todoViewModel);
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!_todoService.TodoExists(todo.Id))
+            if (!_todoService.TodoExists(todoViewModel.Id))
             {
                 return NotFound();
             }
@@ -161,22 +118,14 @@ public class TodoController : Controller
             return NotFound();
         }
 
-        var todo = await _todoService.GetTodoById(id.Value);
+        var todoViewModel = await _todoService.GetTodoById(id.Value);
 
-        if (todo == null)
+        if (todoViewModel == null)
         {
             return NotFound();
         }
 
-        var todoResponse = new TodoRequest
-        {
-            Id = todo.Id,
-            Item = todo.Item,
-            IsCompleted = todo.IsCompleted,
-            DueOn = todo.DueOn
-        };
-
-        return View(todoResponse);
+        return View(todoViewModel);
     }
 
     //POST: Todo/Delete/5
@@ -184,14 +133,14 @@ public class TodoController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        if(_todoService.GetTodos() == null)
+        if (_todoService.GetTodos() == null)
         {
             return Problem("Entity set 'TodoDbContext' is null!");
         }
 
-        var todo = await _todoService.GetTodoById(id);
+        var todoViewModel = await _todoService.GetTodoById(id);
 
-        if (todo != null)
+        if (todoViewModel != null)
         {
             await _todoService.DeleteTodo(id);
         }
