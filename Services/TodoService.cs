@@ -16,9 +16,11 @@ namespace TodoApp.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<TodoViewModel>> GetTodos()
+        public async Task<IEnumerable<TodoViewModel>> GetTodos(int userId)
         {
-            var todos = await _context.Todos.ToListAsync();
+            var todos = await _context.Todos
+                .Where(todo => todo.UserId == userId)
+                .ToListAsync();
 
             return _mapper.Map<IEnumerable<TodoViewModel>>(todos);
         }
@@ -30,9 +32,10 @@ namespace TodoApp.Services
             return _mapper.Map<TodoViewModel>(todo);
         }
 
-        public async Task<TodoViewModel> CreateTodo(TodoViewModel todoViewModel)
+        public async Task<TodoViewModel> CreateTodo(TodoViewModel todoViewModel, int userId)
         {
             var todo = _mapper.Map<Todo>(todoViewModel);
+            todo.UserId = userId;
 
             _context.Add(todo);
             await _context.SaveChangesAsync();
@@ -40,9 +43,9 @@ namespace TodoApp.Services
             return _mapper.Map<TodoViewModel>(todo);
         }
 
-        public async Task<TodoViewModel> UpdateTodo(TodoViewModel todoViewModel)
+        public async Task<TodoViewModel> UpdateTodo(TodoViewModel todoViewModel, int userId)
         {
-            var todo = _context.Todos.FirstOrDefault(todo => todo.Id == todoViewModel.Id);
+            var todo = _context.Todos.FirstOrDefault(todo => todo.Id == todoViewModel.Id);            
 
             if (todo == null)
             {
@@ -54,9 +57,9 @@ namespace TodoApp.Services
                 todo.Item = todoViewModel.Item;
                 todo.IsCompleted = todoViewModel.IsCompleted;
                 todo.DueOn = todoViewModel.DueOn;
+                todo.UserId = userId;
                 todo.UpdatedAt = DateTime.Now;
             }
-
 
             _context.Update(todo);
             await _context.SaveChangesAsync();

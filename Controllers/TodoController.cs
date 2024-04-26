@@ -15,7 +15,7 @@ public class TodoController : Controller
 
     public async Task<IActionResult> IndexAsync()
     {
-        var todoViewModels = await _todoService.GetTodos();
+        var todoViewModels = await _todoService.GetTodos(1);
 
         if (todoViewModels == null)
         {
@@ -53,7 +53,7 @@ public class TodoController : Controller
             return View(todoViewModel);
         }
 
-        await _todoService.CreateTodo(todoViewModel);
+        await _todoService.CreateTodo(todoViewModel, 1);
 
         return RedirectToAction(nameof(Index));
     }
@@ -61,7 +61,7 @@ public class TodoController : Controller
     // GET: Courses/Edit/5
     public async Task<IActionResult> Edit(int? id)
     {
-        if (id == null || _todoService.GetTodos() == null)
+        if (id == null || _todoService.GetTodos(1) == null)
         {
             return NotFound();
         }
@@ -93,7 +93,7 @@ public class TodoController : Controller
 
         try
         {
-            await _todoService.UpdateTodo(todoViewModel);
+            await _todoService.UpdateTodo(todoViewModel, 1);
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -133,7 +133,7 @@ public class TodoController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        if (_todoService.GetTodos() == null)
+        if (_todoService.GetTodos(1) == null)
         {
             return Problem("Entity set 'TodoDbContext' is null!");
         }

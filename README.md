@@ -13,6 +13,7 @@ Use the Nugget Package Manager to install the following packages:
 	- Microsoft.EntityFrameworkCore.Tools
 	- Microsoft.VisualStudio.Web.CodeGeneration.Design
 	- Swashbuckle.AspNetCore
+	- Microsoft.AspNetCore.Authentication.JwtBeare
 
 ## Creating the Database
 ### Applying Migrations to Database

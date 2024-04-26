@@ -11,7 +11,7 @@ using TodoApp.Models;
 namespace TodoApp.Migrations
 {
     [DbContext(typeof(TodoDbContext))]
-    [Migration("20240418094326_Initial")]
+    [Migration("20240424095056_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -43,9 +43,52 @@ namespace TodoApp.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("Todos");
+                });
+
+            modelBuilder.Entity("TodoApp.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("TodoApp.Models.Todo", b =>
+                {
+                    b.HasOne("TodoApp.Models.User", "User")
+                        .WithMany("Todos")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TodoApp.Models.User", b =>
+                {
+                    b.Navigation("Todos");
                 });
 #pragma warning restore 612, 618
         }

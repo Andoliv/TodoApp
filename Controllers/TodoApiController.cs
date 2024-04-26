@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TodoApp.Services;
 using TodoApp.ViewModels;
 
 namespace TodoApp.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/todos")]
 public class TodoApiController : ControllerBase
 {
@@ -22,7 +25,9 @@ public class TodoApiController : ControllerBase
     {
         try
         {
-            var todos = await _todoService.GetTodos();
+            var userId = GetUserId();
+
+            var todos = await _todoService.GetTodos(userId);
 
             return Ok(todos);
         }
@@ -70,7 +75,7 @@ public class TodoApiController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            var createdTodoViewModel = await _todoService.CreateTodo(todoViewModel);
+            var createdTodoViewModel = await _todoService.CreateTodo(todoViewModel, GetUserId());
 
             return CreatedAtAction(nameof(GetTodoById), new { id = createdTodoViewModel.Id }, createdTodoViewModel);
         }
@@ -90,12 +95,7 @@ public class TodoApiController : ControllerBase
     public async Task<IActionResult> UpdateTodo([FromRoute] int id, [FromBody] TodoViewModel todoViewModel)
     {
         try
-        {
-            if (todoViewModel.Id == null)
-            {
-                todoViewModel.Id = id;
-            }
-
+        {                       
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -106,7 +106,9 @@ public class TodoApiController : ControllerBase
                 return NotFound("The ToDo you are looking for does not exist!");
             }
 
-            var updatedTodoViewModel = await _todoService.UpdateTodo(todoViewModel);
+            todoViewModel.Id = id;
+
+            var updatedTodoViewModel = await _todoService.UpdateTodo(todoViewModel, 1);
 
             return Ok(updatedTodoViewModel);
         }
@@ -139,6 +141,19 @@ public class TodoApiController : ControllerBase
             return Problem(ex.Message);
         }
 
+    }
+
+    private int GetUserId()
+    {
+        var claim = this.User.Claims.FirstOrDefault(claim => claim.Type == "userId");
+
+        if (claim == null)
+        {
+            throw new Exception("UserId claim not found in token!");
+        }
+
+
+        return int.Parse(claim.Value);
     }
 
 }
